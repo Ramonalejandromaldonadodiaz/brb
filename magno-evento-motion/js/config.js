@@ -2,7 +2,7 @@
 // Para cambiar un dato: edítalo aquí y vuelve a renderizar (ver README.md).
 window.CONFIG = {
   fps: 30,
-  duration: 26.0, // segundos
+  duration: 31.0, // segundos
 
   evento: {
     invita: 'te invita al',
@@ -41,7 +41,17 @@ window.CONFIG = {
     { nombre: 'ACH de México', logo: 'assets/sponsors/09-ach-de-mexico.png' },
   ],
 
-  cta: 'CONFIRMA TU ASISTENCIA',
+  cta: 'COMPRA TU BOLETO',
+
+  // Pantalla final con el QR de compra (la imagen es el QR original; no regenerarlo)
+  boletos: {
+    titulo1: 'COMPRA',
+    titulo2: 'TU BOLETO',
+    sub: 'Escanea el código o entra a',
+    url: 'blackringbusiness.com/evento-13-noviembre',
+    qr: 'assets/qr-evento.png',
+    info: '13 NOV · 3:00–8:00 PM · PRESIDENTE INTERCONTINENTAL GDL',
+  },
   web: 'blackringbusiness.com',
   lema: ['NO SEGUIMOS EL FUTURO,', 'LO CONSTRUIMOS.'],
 
@@ -53,6 +63,7 @@ window.CONFIG = {
     wipe2: 13.0, header4: 13.35, cards: 13.75, sweep4: 15.6,
     iris: 17.0, photo5: 16.9, dia: 18.0, mes: 18.3, hora: 19.0, sede: 19.5,
     out5: 21.0, s5b: 21.3, cta: 22.5, web: 22.9, lema: 23.3, glint5: 24.0,
-    end: 26.0,
+    qr: 26.0, qrCard: 26.35, qrUrl: 27.0,
+    end: 31.0,
   },
 };

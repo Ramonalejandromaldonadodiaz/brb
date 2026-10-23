@@ -86,7 +86,7 @@ function splitChars(node, text, cls = '') {
 
 /* ------------------------------------------------------------------ construcción */
 const stage = $('#stage'), cam = $('#cam');
-const SC = { s1: $('#s1'), s2: $('#s2'), s3: $('#s3'), s4: $('#s4'), s5a: $('#s5a'), s5b: $('#s5b') };
+const SC = { s1: $('#s1'), s2: $('#s2'), s3: $('#s3'), s4: $('#s4'), s5a: $('#s5a'), s5b: $('#s5b'), s6: $('#s6') };
 
 // Bisel metálico (SVG): luz especular animable por palabra
 const defs = $('#defs defs');
@@ -115,6 +115,8 @@ bevel('fMagno'); bevel('fEvento');
 bevel('fDia', { surf: 8, blur: 4, depth: 8, dil: 3.5, sb: 22, sy: 24, lx: 300 });
 bevel('fMagno2', { surf: 5, blur: 2.4, depth: 4, dil: 2, sb: 12, sy: 12 });
 bevel('fEvento2', { surf: 5, blur: 2.4, depth: 4, dil: 2, sb: 12, sy: 12 });
+bevel('fQ1', { surf: 6, blur: 3, depth: 5, dil: 2.5, sb: 14, sy: 16 });
+bevel('fQ2', { surf: 6, blur: 3, depth: 5, dil: 2.5, sb: 14, sy: 16 });
 
 // Logo "BLΛCK RING® / BUSINESS / NETWORK"
 function makeLogo(root) {
@@ -245,6 +247,24 @@ const webCh = splitChars($('#web'), C.web);
 const lema1 = $('#lema1'), lema2 = $('#lema2');
 lema1.textContent = C.lema[0]; lema2.textContent = C.lema[1] || '';
 
+/* escena 6: QR de compra */
+const BQ = C.boletos;
+$('#q-t1 text').textContent = BQ.titulo1;
+$('#q-t2 text').textContent = BQ.titulo2;
+const qKicker = $('#q-kicker'), qT1 = $('#q-t1'), qT2 = $('#q-t2'), qCard = $('#q-card'), qScan = $('#q-scan');
+const qSub = $('#q-sub'), qUrl = $('#q-url'), qInfo = $('#q-info'), qBr = $('#q-brackets');
+$('#q-img').src = BQ.qr;
+qKicker.textContent = C.evento.titulo1 + ' ' + C.evento.titulo2 + ' ' + C.evento.titulo3;
+qSub.textContent = BQ.sub + ':';
+const qUrlCh = splitChars(qUrl.querySelector('.fit'), BQ.url);
+qInfo.textContent = BQ.info;
+// esquinas doradas alrededor del QR
+const QB = { x0: 210, y0: 660, x1: 870, y1: 1320, L: 74 };
+const Q_CORNERS = [
+  `M${QB.x0} ${QB.y0 + QB.L}V${QB.y0}H${QB.x0 + QB.L}`, `M${QB.x1 - QB.L} ${QB.y0}H${QB.x1}V${QB.y0 + QB.L}`,
+  `M${QB.x1} ${QB.y1 - QB.L}V${QB.y1}H${QB.x1 - QB.L}`, `M${QB.x0 + QB.L} ${QB.y1}H${QB.x0}V${QB.y1 - QB.L}`,
+].map(d => { const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', d); p.setAttribute('fill', 'none'); p.setAttribute('stroke', '#f2c862'); p.setAttribute('stroke-width', '6'); p.setAttribute('stroke-linecap', 'round'); p.setAttribute('pathLength', '1'); p.style.strokeDasharray = '1'; qBr.appendChild(p); return p; });
+
 // Ajuste de textos largos para que nunca se salgan del cuadro (mide sin escalas CSS)
 function shrinkToFit(el, max, min = 18) {
   let fs = parseFloat(getComputedStyle(el).fontSize);
@@ -261,6 +281,7 @@ function layoutFits() {
   shrinkToFit(sede1.querySelector('.fit'), 1000);
   const p3 = $('#p3'); p3.style.display = 'inline-block'; shrinkToFit(p3, 920 - 52 - 58 - 26 - 36);
   const ct = $('#ctaTxt'); shrinkToFit(ct, 720 - 64 - 58);
+  shrinkToFit(qUrl.querySelector('.fit'), 980);
 }
 
 /* ------------------------------------------------------------------ escena 1: globo */
@@ -620,8 +641,12 @@ function scene5a(t) {
 
 /* ------------------------------------------------------------------ escena 5b: cierre */
 function scene5b(t) {
-  const on = t >= K.s5b - .05; vis(SC.s5b, on); if (!on) return;
+  const on = t >= K.s5b - .05 && t < K.qr + .5; vis(SC.s5b, on); if (!on) return;
   const t0 = K.s5b;
+  const out = P(t, K.qr - .1, .45, E.inCubic);
+  SC.s5b.style.opacity = (1 - out).toFixed(3);
+  SC.s5b.style.transform = out > 0 ? `scale(${(1 + .12 * out).toFixed(4)})` : '';
+  SC.s5b.style.filter = out > .01 ? `blur(${f2(8 * out)}px)` : '';
   br1.style.strokeDashoffset = (1 - P(t, t0, 1.4, E.inOutCubic)).toFixed(4);
   br1.setAttribute('transform', `rotate(${f2(-90 + (t - t0) * 6)} 540 620)`);
   br2.setAttribute('transform', `rotate(${f2(-(t - t0) * 9)} 540 620)`);
@@ -648,6 +673,29 @@ function scene5b(t) {
   webCh.forEach((c, i) => { const p = P(t, K.web + i * .022, .35); S(c, { o: p, y: 8 * (1 - p) }); });
   [lema1, lema2].forEach((l, i) => { const p = P(t, K.lema + i * .22, .8); S(l, { o: p, y: 16 * (1 - p), blur: 4 * (1 - p) }); });
   sheen($('#sheen5'), t, K.glint5, 1.1);
+}
+
+function scene6(t) {
+  const on = t >= K.qr - .1; vis(SC.s6, on); if (!on) return;
+  const kp = P(t, K.qr + .05, .9, E.outExpo), kls = lerp(.7, .3, kp);
+  qKicker.style.letterSpacing = kls + 'em'; qKicker.style.paddingLeft = kls + 'em';
+  S(qKicker, { o: P(t, K.qr + .05, .4) });
+  S(qT1, slam(t, K.qr + .3, 1.8, .22));
+  S(qT2, slam(t, K.qr + .55, 1.6, .22));
+  bevLight('fQ1', t, K.qr + .3, K.qr + 1.4);
+  bevLight('fQ2', t, K.qr + .55, K.qr + 1.52);
+  // el QR aparece y a partir de qrCard + .9 queda quieto y sin nada encima (para que escanee)
+  const cp = P(t, K.qrCard, .6, E.outBack);
+  S(qCard, { o: P(t, K.qrCard, .15), s: lerp(.6, 1, cp) });
+  const sp = (t - (K.qrCard + .3)) / .55;
+  if (sp > 0 && sp < 1) { qScan.style.opacity = Math.sin(Math.PI * sp).toFixed(3); qScan.style.transform = `translateY(${f2(lerp(-120, 600, sp))}px)`; }
+  else qScan.style.opacity = 0;
+  Q_CORNERS.forEach((p, i) => { p.style.strokeDashoffset = (1 - P(t, K.qrCard + .2 + i * .06, .5)).toFixed(4); });
+  const breathe = t > K.qrCard + 1 ? .55 + .45 * Math.sin((t - K.qrCard - 1) * TAU / 1.6) : 1;
+  qBr.style.opacity = breathe.toFixed(3);
+  S(qSub, { o: P(t, K.qrUrl - .15, .4), y: 12 * (1 - P(t, K.qrUrl - .15, .5)) });
+  qUrlCh.forEach((c, i) => { const p = P(t, K.qrUrl + i * .015, .3); S(c, { o: p, y: 8 * (1 - p) }); });
+  S(qInfo, { o: P(t, K.qrUrl + .6, .5) });
 }
 
 /* ------------------------------------------------------------------ fondo, partículas, luces */
@@ -698,7 +746,7 @@ function arcs(t) {
 const fcv = $('#fx'), fc = fcv.getContext('2d');
 const DUST = (() => { const r = rng(7); return Array.from({ length: 140 }, () => ({ x: r() * W, y: r() * H, vy: -(5 + r() * 24), vx: (r() - .5) * 8, s: .5 + r() * 1.5, f: .2 + r() * .9, ph: r() * TAU, a: .12 + r() * .5, wob: 5 + r() * 16 })); })();
 const BOKEH = (() => { const r = rng(9); return Array.from({ length: 16 }, () => ({ x: r() * W, y: r() * H, R: 28 + r() * 70, vy: -(3 + r() * 8), vx: (r() - .5) * 6, a: .03 + r() * .07, ph: r() * TAU })); })();
-const DUSTK = [[0, 0], [1, .7], [3.3, .7], [3.6, 1], [30, 1]];
+const DUSTK = [[0, 0], [1, .7], [3.3, .7], [3.6, 1], [25.9, 1], [26.5, .25], [40, .25]];
 const BURSTS = [
   { t: K.ringClose, ring: true, n: 70, sp: 380, life: 1.2, seed: 21 },
   { t: K.magno, x: 540, y: 962, w: 860, n: 110, sp: 900, life: 1.15, seed: 22 },
@@ -715,13 +763,14 @@ const SPARKS = [
   [K.ringClose + .02, 430, 897, 1.2], [K.magno + .05, 150, 910, 1.1], [K.magno + .12, 960, 940, .9], [K.evento + .08, 905, 1075, .8],
   [K.glint + .35, 300, 898, .9], [K.glint + .62, 820, 902, 1], [K.glint + .82, 640, 1068, .8], [K.box + .5, 190, 1218, .7], [K.box + .56, 890, 1314, .7],
   [K.dia + .1, 330, 760, 1.2], [K.dia + 1.6, 760, 742, .9], [K.cta + .15, 150, 1282, .9], [K.cta + .25, 930, 1382, .9],
-  [K.glint5 + .3, 230, 500, .9], [K.glint5 + .6, 850, 505, 1], [25.0, 540, 1272, .8],
+  [K.glint5 + .3, 230, 500, .9], [K.glint5 + .6, 850, 505, 1], [25.0, 540, 1272, .8], [K.qrCard + .5, 214, 664, 1], [K.qrCard + .62, 866, 1316, 1],
 ];
 const FLASHES = [
   { t: K.ringClose, a: .14, d: .45, pre: .04 }, { t: K.s2, a: .85, d: .32, pre: .1 }, { t: K.magno, a: .26, d: .4, pre: .03 },
   { t: K.evento, a: .14, d: .35, pre: .03 }, { t: K.dia, a: .28, d: .45, pre: .03 }, { t: K.s5b + .05, a: .1, d: .5, pre: .2 }, { t: K.cta, a: .12, d: .4, pre: .03 },
+  { t: K.qr + .3, a: .22, d: .4, pre: .03 },
 ];
-const SHAKES = [{ t: K.magno, a: 15, d: .45 }, { t: K.evento, a: 9, d: .35 }, { t: K.dia, a: 16, d: .5 }, { t: K.cta, a: 4, d: .3 }];
+const SHAKES = [{ t: K.magno, a: 15, d: .45 }, { t: K.evento, a: 9, d: .35 }, { t: K.dia, a: 16, d: .5 }, { t: K.cta, a: 4, d: .3 }, { t: K.qr + .3, a: 9, d: .35 }, { t: K.qr + .55, a: 6, d: .3 }];
 
 function particles(t) {
   fc.clearRect(0, 0, W, H);
@@ -814,7 +863,7 @@ function grain(t) {
 /* ------------------------------------------------------------------ seek */
 function seek(t) {
   background(t); arcs(t); drawGlobe(t);
-  scene1(t); scene2(t); scene3(t); scene4(t); scene5a(t); scene5b(t);
+  scene1(t); scene2(t); scene3(t); scene4(t); scene5a(t); scene5b(t); scene6(t);
   particles(t); overlays(t); grain(t);
 }
 window.seek = seek;

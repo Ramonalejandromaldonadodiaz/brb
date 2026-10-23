@@ -23,6 +23,6 @@ ffmpeg -y -loglevel error -i out/magno-evento-invitacion-9x16.mp4 -vf "scale=720
   -c:v libx264 -preset slow -crf 22 -profile:v high -pix_fmt yuv420p -colorspace bt709 -color_primaries bt709 -color_trc bt709 \
   -c:a aac -b:a 160k -movflags +faststart out/magno-evento-invitacion-whatsapp.mp4
 # Portada (último cuadro, sin compresión de video)
-node render/render.mjs --frames 25.9 --dir out/.portada && mv out/.portada/f_25.90.png out/portada.png && rmdir out/.portada
+node render/render.mjs --frames 30.9 --dir out/.portada && mv out/.portada/f_30.90.png out/portada.png && rmdir out/.portada
 rm -f out/_video.mp4
 ls -lh out/*.mp4 out/portada.png

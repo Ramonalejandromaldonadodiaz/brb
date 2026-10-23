@@ -292,7 +292,7 @@ for a, b, notes, _ in CHORDS:
     add(pad_chord(notes, b - a + .15, attack=1.8 if first else .5, release=1.4), a, gain=1.0, bus=PADB)
 
 # Bajo en corcheas durante el ritmo
-GROOVE = [(6.0, K['iris']), (K['dia'], K['out5']), (K['cta'], 25.0)]
+GROOVE = [(6.0, K['iris']), (K['dia'], K['out5']), (K['cta'], 25.0), (K['qr'], 30.0)]
 def chord_root(t):
     for a, b, _, root in CHORDS:
         if a <= t < b:
@@ -315,7 +315,7 @@ def chord_notes(t):
             return [up12(n) for n in notes]
     return ['D4', 'F4', 'A4', 'E5']
 ARP = [0, 1, 2, 3, 2, 1, 2, 3]
-for a, b in ((K['wipe1'], 16.5), (K['dia'], K['out5']), (K['cta'], 25.0)):
+for a, b in ((K['wipe1'], 16.5), (K['dia'], K['out5']), (K['cta'], 25.0), (K['qr'] + 1.0, 30.0)):
     t, i = a, 0
     while t < b - 1e-6:
         notes = chord_notes(t)
@@ -346,6 +346,7 @@ for j in range(8):  # redoble hacia el iris
 groove(16.5, K['iris'], clap_on=False)
 groove(K['dia'], K['out5'])
 groove(K['cta'], 25.0)
+groove(K['qr'], 30.0)
 
 # ---------------------------------------------------------------- diseño sonoro sincronizado
 add(ffilt(rng.standard_normal(int(3.6 * SR)), bp(400, 2500)) * np.clip(tt(int(3.6 * SR)) / 2, 0, 1), 0, gain=.025, send=.2)  # aire
@@ -401,6 +402,16 @@ add(impact(.7), K['cta'], gain=.6, send=.35)
 add(stab(['D3', 'F#3', 'A3', 'D4']), K['cta'], gain=.28, send=.45)
 shimmer(K['cta'], count=20, scale=('D6', 'E6', 'F#6', 'A6', 'B6', 'D7'), gain=.08)
 shimmer(25.0, count=14, scale=('D6', 'E6', 'F#6', 'A6', 'B6', 'D7'), spread=.8, gain=.06)
+# pantalla del QR: golpes de "COMPRA" / "TU BOLETO", aparición del código y cierre
+add(whoosh(.6, 3000, -.6, .6), K['qr'] - .2, gain=.14, send=.4)
+for key_t, size in ((K['qr'] + .3, .8), (K['qr'] + .55, .6)):
+    add(impact(size), key_t, gain=.6, send=.3)
+add(stab(['D3', 'F#3', 'A3', 'D4']), K['qr'] + .3, gain=.22, send=.45)
+shimmer(K['qrCard'], count=18, scale=('D6', 'E6', 'F#6', 'A6', 'B6', 'D7'), spread=.5, gain=.08)
+add(whoosh(.55, 6000, -.3, .3), K['qrCard'] + .3, gain=.05, send=.4)
+for i in range(12):
+    add(bell(hz(['D6', 'E6', 'F#6', 'A6'][i % 4]), .2), K['qrUrl'] + i * .05, gain=.02, pan=-.5 + i * .09, send=.4)
+shimmer(30.0, count=12, scale=('D6', 'E6', 'F#6', 'A6', 'B6', 'D7'), spread=.6, gain=.05)
 
 # ---------------------------------------------------------------- mezcla
 duck = np.ones(N)
