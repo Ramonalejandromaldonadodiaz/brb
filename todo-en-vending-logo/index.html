@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Todo en Vending — Animación de logo</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { overflow: hidden; background: #fff; }
+#stage { position: relative; overflow: hidden; background: radial-gradient(85% 55% at 50% 46%, #ffffff 0%, #f6f6f7 45%, #e4e5e8 100%); }
+.layer { position: absolute; inset: 0; pointer-events: none; }
+#rays { position: absolute; width: 3000px; height: 3000px; margin: -1500px 0 0 -1500px; opacity: 0;
+  background: repeating-conic-gradient(from 0deg, rgba(220,0,15,.07) 0deg 5deg, rgba(220,0,15,0) 5deg 15deg);
+  -webkit-mask-image: radial-gradient(circle, #000 0%, rgba(0,0,0,.6) 22%, transparent 48%); }
+#dots { opacity: .5; background-image: radial-gradient(rgba(30,30,30,.12) 1.4px, transparent 1.6px); background-size: 26px 26px;
+  -webkit-mask-image: radial-gradient(70% 45% at 50% 46%, transparent 40%, #000 100%); }
+.band { position: absolute; height: 120px; width: 1800px; transform-origin: 0 50%; }
+#floor { position: absolute; width: 900px; height: 90px; margin-left: -450px; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(0,0,0,.28), rgba(0,0,0,.12) 55%, rgba(0,0,0,0)); opacity: 0; }
+#logo { position: absolute; left: 0; top: 0; width: 1536px; height: 513px; transform-origin: 768px 290px; }
+#logo img, #logo canvas { position: absolute; display: block; will-change: transform; }
+#logo img { filter: drop-shadow(0 10px 9px rgba(0,0,0,.16)); }
+#urlbar { position: absolute; width: 8px; background: #dc000f; border-radius: 4px; }
+#flash { background: radial-gradient(60% 40% at 50% 46%, rgba(255,255,255,1), rgba(255,255,255,0) 70%); opacity: 0; }
+.wipe { position: absolute; left: 50%; top: 50%; width: 2600px; height: 900px; margin: -450px 0 0 -1300px; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="layer" id="dots"></div>
+  <div id="rays"></div>
+  <div class="band" id="bandA" style="background:#dc000f"></div>
+  <div class="band" id="bandB" style="background:#1b1b1b"></div>
+  <div class="band" id="bandC" style="background:#dc000f"></div>
+  <div class="band" id="bandD" style="background:#1b1b1b"></div>
+  <canvas class="layer" id="back"></canvas>
+  <div id="floor"></div>
+  <div id="logo"></div>
+  <canvas class="layer" id="front"></canvas>
+  <div class="layer" id="flash"></div>
+  <div class="wipe" id="w1" style="background:#dc000f"></div>
+  <div class="wipe" id="w2" style="background:#1b1b1b"></div>
+  <div class="wipe" id="w3" style="background:#f2c200"></div>
+</div>
+<script src="js/config.js"></script>
+<script src="assets/parts/parts.js"></script>
+<script src="js/motion.js"></script>
+</body>
+</html>
